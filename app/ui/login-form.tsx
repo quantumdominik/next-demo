@@ -1,13 +1,32 @@
+'use client';
+
 import { lusitana } from "@/app/ui/fonts";
 import {
   AtSymbolIcon,
   KeyIcon,
-  ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { ArrowRightIcon } from "@heroicons/react/20/solid";
 import { Button } from "./button";
+import { signIn } from "next-auth/react";
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export default function LoginForm() {
+  const router = useRouter();
+
+
+
+  const handleTwitterSignIn = async () => {
+    console.log('Initiating Twitter sign-in');
+    try {
+      const result = await signIn('twitter', { callbackUrl: '/dashboard' });
+      console.log('Sign-in result:', result);
+    } catch (error) {
+      console.error('Error during sign-in:', error);
+    }
+  };
+
   return (
     <form className="space-y-3">
       <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
@@ -58,8 +77,30 @@ export default function LoginForm() {
         <Button className="mt-4 w-full">
           Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
         </Button>
-        <div className="flex h-8 items-end space-x-1">
-          {/* Add form errors here */}
+        <div className="mt-6 flex flex-col items-center space-y-4">
+          <div className="text-sm text-gray-500">Or</div>
+          <button
+            className="flex items-center justify-center w-full px-4 py-2 text-white bg-[#1DA1F2] rounded-md hover:bg-[#1a91da] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1DA1F2]"
+            onClick={(e) => {
+              e.preventDefault();
+              handleTwitterSignIn();
+            }}
+          >
+            <Image
+              src="/twitter-logo.png"
+              alt="Twitter Logo"
+              width={20}
+              height={20}
+              className="mr-2"
+            />
+            Sign in with Twitter
+          </button>
+          <div className="text-sm">
+            Don't have an account?{' '}
+            <Link href="/signup" className="text-blue-500 hover:underline">
+              Sign up
+            </Link>
+          </div>
         </div>
       </div>
     </form>

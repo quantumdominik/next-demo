@@ -10,7 +10,7 @@ import {
 import { updateInvoice } from "@/app/lib/actions";
 import Link from "next/link";
 import { Button } from "@/app/ui/button";
-import { NumericFormat } from "react-number-format";
+import { NumericFormat, NumberFormatValues } from "react-number-format";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -42,7 +42,7 @@ export default function EditInvoiceForm({
   };
 
   return (
-    <form action={handleSubmit}>
+    <form onSubmit={(e) => { e.preventDefault(); handleSubmit(new FormData(e.currentTarget)); }}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -80,7 +80,7 @@ export default function EditInvoiceForm({
                 id="amount"
                 name="amount"
                 value={amount}
-                onValueChange={(values) => setAmount(values.value)}
+                onValueChange={(values: NumberFormatValues) => setAmount(Number(values.value))}
                 thousandSeparator={true}
                 prefix={"$"}
                 decimalScale={2}

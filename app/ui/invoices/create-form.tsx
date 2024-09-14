@@ -11,19 +11,25 @@ import {
 import { Button } from "@/app/ui/button";
 import { createInvoice } from "@/app/lib/actions";
 import { useState } from "react";
-import { NumericFormat } from "react-number-format";
+import { NumericFormat, NumberFormatValues } from "react-number-format";
+import { useRouter } from "next/navigation";
 
 export default function Form({ customers }: { customers: CustomerField[] }) {
   const [amount, setAmount] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const handleSubmit = (formData: FormData) => {
-    const numericAmount = parseFloat(amount.replace(/[^0-9.-]+/g, ""));
-    formData.set("amount", numericAmount.toString());
-    createInvoice(formData);
+  const handleSubmit = async (formData: FormData) => {
+    setError(null);
+    const result = await createInvoice({} as any, formData);
+    if ('errors' in result) {
+      setError(result.message || "An error occurred");
+    } else {
+      router.push('/dashboard/invoices');
+    }
   };
-
   return (
-    <form action={handleSubmit}>
+    <form onSubmit={(e) => { e.preventDefault(); handleSubmit(new FormData(e.currentTarget)); }}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -36,6 +42,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
               name="customerId"
               className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               defaultValue=""
+              required
             >
               <option value="" disabled>
                 Select a customer
@@ -90,6 +97,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
                   type="radio"
                   value="pending"
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
+                  defaultChecked
                 />
                 <label
                   htmlFor="pending"
@@ -126,6 +134,9 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
         </Link>
         <Button type="submit">Create Invoice</Button>
       </div>
+      {error && (
+        <p className="mt-4 text-sm text-red-500">{error}</p>
+      )}
     </form>
   );
 }
