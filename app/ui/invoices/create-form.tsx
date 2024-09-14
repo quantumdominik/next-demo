@@ -1,16 +1,29 @@
-import { CustomerField } from '@/app/lib/definitions';
-import Link from 'next/link';
+"use client";
+
+import { CustomerField } from "@/app/lib/definitions";
+import Link from "next/link";
 import {
   CheckIcon,
   ClockIcon,
   CurrencyDollarIcon,
   UserCircleIcon,
-} from '@heroicons/react/24/outline';
-import { Button } from '@/app/ui/button';
+} from "@heroicons/react/24/outline";
+import { Button } from "@/app/ui/button";
+import { createInvoice } from "@/app/lib/actions";
+import { useState } from "react";
+import { NumericFormat } from "react-number-format";
 
 export default function Form({ customers }: { customers: CustomerField[] }) {
+  const [amount, setAmount] = useState("");
+
+  const handleSubmit = (formData: FormData) => {
+    const numericAmount = parseFloat(amount.replace(/[^0-9.-]+/g, ""));
+    formData.set("amount", numericAmount.toString());
+    createInvoice(formData);
+  };
+
   return (
-    <form>
+    <form action={handleSubmit}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -44,13 +57,19 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
           </label>
           <div className="relative mt-2 rounded-md">
             <div className="relative">
-              <input
+              <NumericFormat
                 id="amount"
                 name="amount"
-                type="number"
-                step="0.01"
+                value={amount}
+                onValueChange={(values) => setAmount(values.value)}
+                thousandSeparator={true}
+                prefix={"$"}
+                decimalScale={2}
+                fixedDecimalScale={true}
+                allowNegative={false}
                 placeholder="Enter USD amount"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                required
               />
               <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>
