@@ -21,7 +21,6 @@ export const authOptions = {
         Twitter({
             clientId: process.env.TWITTER_CLIENT_ID!,
             clientSecret: process.env.TWITTER_CLIENT_SECRET!,
-            callbackUrl: "http://localhost:3000/api/auth/callback/twitter",
         }),
         Credentials({
             credentials: {
