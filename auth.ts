@@ -3,9 +3,9 @@ import { authConfig } from './auth.config';
 import Twitter from 'next-auth/providers/twitter';
 import Credentials from 'next-auth/providers/credentials';
 import { sql } from '@vercel/postgres';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
-async function getUser(email: string) {
+export async function getUser(email: string) {
     try {
         const user = await sql`SELECT * FROM users WHERE email=${email}`;
         return user.rows[0];
@@ -32,10 +32,10 @@ export const authOptions = {
                     return null;
                 }
 
-                const user = await getUser(credentials.email);
+                const user = await getUser(credentials.email as string);
                 if (!user) return null;
 
-                const passwordsMatch = await bcrypt.compare(credentials.password, user.password);
+                const passwordsMatch = await bcrypt.compare(credentials.password as string, user.password as string);
 
                 if (passwordsMatch) return user;
 

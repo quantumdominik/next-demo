@@ -1,6 +1,8 @@
 import type { NextAuthConfig } from 'next-auth';
 import Twitter from 'next-auth/providers/twitter';
 import Credentials from 'next-auth/providers/credentials';
+import { getUser } from './auth';
+import bcrypt from 'bcryptjs';
 
 export const authConfig: NextAuthConfig = {
     pages: {
@@ -30,15 +32,28 @@ export const authConfig: NextAuthConfig = {
                 password: { label: "Password", type: "password", required: true }
             },
             async authorize(credentials) {
-                // Here you should lookup the user in your db and compare the password:
-                // if (user && comparePasswords(user.password, credentials.password)) {
-                //   return user
-                // }
-                // For this example, we'll just simulate a successful login
-                if (credentials.email === "user@example.com" && credentials.password === "password") {
-                    return { id: 1, name: "J Smith", email: "user@example.com" }
+                if (!credentials?.email || !credentials.password) {
+                    return null;
                 }
-                return null
+
+                try {
+                    const user = await getUser(credentials.email as string);
+                    if (!user) return null;
+
+                    const passwordsMatch = await bcrypt.compare(credentials.password as string, user.password as string);
+
+                    if (passwordsMatch) {
+                        return {
+                            id: user.id,
+                            name: user.name,
+                            email: user.email,
+                        };
+                    }
+                } catch (error) {
+                    console.error('Error during authorization:', error);
+                }
+
+                return null;
             }
         })
     ],
